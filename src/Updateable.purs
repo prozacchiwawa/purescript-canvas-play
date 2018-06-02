@@ -8,5 +8,5 @@ import Graphics.Canvas as C
 import GameInputs
     
 class Updateable a where
-    update :: a -> Instant -> GameInputs -> a
+    update :: a -> GameEvent -> a
                    

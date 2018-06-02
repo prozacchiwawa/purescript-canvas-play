@@ -10,15 +10,15 @@ import Data.Maybe (Maybe(Just, Nothing))
 import Data.DateTime.Instant
 import Web.DOM
 import Graphics.Canvas as C
-import Signal (foldp, runSignal, unwrap)
-import Signal.DOM (animationFrame)
+import Signal (foldp, runSignal, unwrap, sampleOn, merge)
+import Signal.DOM (animationFrame, keyPressed)
 
 import Box
 import GameInputs
 import Renderable
 import Scene
 import Updateable
-        
+
 main :: Effect Unit
 main = do
   mcanvas <- C.getCanvasElementById "scene"
@@ -27,27 +27,23 @@ main = do
                  context <- C.getContext2D canvas
                  frames <- animationFrame
                  currentInstant <- now
+                 jumpSignal <- keyPressed 32
                  timeSignal <- unwrap (map (\_ -> now) frames)
-                     
+
                  let game =
                          foldp
-                             runGame
+                             updateGame
                              (initialState currentInstant)
-                             timeSignal
+                             (merge
+                              (map JumpPressed jumpSignal)
+                              (map Time timeSignal)
+                             )
                  runSignal (renderGame context <$> game)
          Nothing -> do
                  pure unit
-    where
-      gameInputs =
-          GameInputs
-          { jump: false
-          }
-      runGame :: Instant -> State -> State
-      runGame instant state = do
-                 updateGame instant gameInputs state
 
-updateGame :: Instant -> GameInputs -> State -> State
-updateGame instant gameinputs state = update state instant gameinputs
+updateGame :: GameEvent -> State -> State
+updateGame event state = update state event
                   
 renderGame :: forall e. C.Context2D -> State -> Effect Unit
 renderGame context state = do

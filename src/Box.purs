@@ -15,6 +15,7 @@ data State = State
     , speed :: Number
     , s :: Instant
     , t :: Instant
+    , jump :: Boolean
     }
 
 initialState :: Instant -> State
@@ -23,6 +24,7 @@ initialState inst = State
     , speed: 10.0
     , s: inst
     , t: inst
+    , jump: false
     }
 
 drawRect :: forall e. C.Context2D -> State -> Effect Unit
@@ -51,27 +53,32 @@ updateState s@(State state_) inst =
             (state_ { t = inst, s = state_.t })
             
         elapsed = gameTime su
+                  
+        reverse = 
+            state.x + scene.boxSize > scene.width ||
+                 state.x < scene.x ||
+                 state.jump
     in
-    if state.x + scene.boxSize > scene.width then
+    if reverse then
         State
         (state
-         { x = scene.width - scene.boxSize
+         { x =
+               if state.x < scene.x then
+                   scene.x
+               else if state.x + scene.boxSize > scene.width then
+                   scene.width - scene.boxSize
+               else
+                   state.x
+                        
          , speed = -state.speed
          }
         )
-  else if state.x < scene.x then
-           State
-           (state
-            { x = scene.x
-            , speed = -state.speed
-            }
-           )
-       else
-           State
-           (state
-            { x = state.x + (state.speed * 60.0 * elapsed)
-            }
-           )
+    else
+        State
+        (state
+         { x = state.x + (state.speed * 60.0 * elapsed)
+         }
+        )
               
 instance renderableState :: Renderable State where
     render s@(State state) context = do
@@ -79,4 +86,7 @@ instance renderableState :: Renderable State where
       C.fillText context (show (gameTime s)) 10.0 10.0
 
 instance updatedableState :: Updateable State where
-    update s t inputs = updateState s t
+    update s@(State state) evt =
+        case evt of
+          Time i -> updateState s i
+          JumpPressed j -> State (state { jump = j })

@@ -12,7 +12,7 @@ import Updateable
         
 data State = State
     { x :: Number
-    , step :: Number
+    , speed :: Number
     , s :: Instant
     , t :: Instant
     }
@@ -20,7 +20,7 @@ data State = State
 initialState :: Instant -> State
 initialState inst = State
     { x: 0.0
-    , step: 10.0
+    , speed: 10.0
     , s: inst
     , t: inst
     }
@@ -36,36 +36,47 @@ drawRect ctx (State state) = do
        }
   pure unit
 
+gameTime (State state) =
+    let
+        (Milliseconds uit) = unInstant state.t
+        (Milliseconds uis) = unInstant state.s
+    in
+    (uit - uis) / 1000.0
+       
 updateState :: State -> Instant -> State
-updateState (State state) inst =
+updateState s@(State state_) inst =
+    let
+        su@(State state) =
+            State
+            (state_ { t = inst, s = state_.t })
+            
+        elapsed = gameTime su
+    in
     if state.x + scene.boxSize > scene.width then
         State
-        { x: scene.width - scene.boxSize
-        , step: -state.step
-        , t: inst
-        , s: state.s
-        }
+        (state
+         { x = scene.width - scene.boxSize
+         , speed = -state.speed
+         }
+        )
   else if state.x < scene.x then
            State
-           { x: scene.x
-           , step: -state.step
-           , t: inst
-           , s: state.s
-           }
+           (state
+            { x = scene.x
+            , speed = -state.speed
+            }
+           )
        else
            State
-           { x: state.x + state.step
-           , step: state.step
-           , t: inst
-           , s: state.s
-           }
+           (state
+            { x = state.x + (state.speed * 60.0 * elapsed)
+            }
+           )
               
 instance renderableState :: Renderable State where
     render s@(State state) context = do
-      let (Milliseconds uit) = unInstant state.t
-      let (Milliseconds uis) = unInstant state.s
       drawRect context s
-      C.fillText context (show (uit - uis)) 10.0 10.0
+      C.fillText context (show (gameTime s)) 10.0 10.0
 
 instance updatedableState :: Updateable State where
     update s t inputs = updateState s t

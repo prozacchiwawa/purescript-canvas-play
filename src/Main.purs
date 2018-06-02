@@ -4,20 +4,20 @@ module Main where
 import Prelude
 
 import Effect (Effect)
-import Effect.Console (log)
+--import Effect.Console (log)
 import Effect.Now (now)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.DateTime.Instant
-import Web.DOM
+--import Data.DateTime.Instant
+--import Web.DOM
 import Graphics.Canvas as C
-import Signal (foldp, runSignal, unwrap, sampleOn, merge)
+import Signal (foldp, runSignal, unwrap, merge)
 import Signal.DOM (animationFrame, keyPressed)
 
-import Box
-import GameInputs
-import Renderable
-import Scene
-import Updateable
+import Box as Box
+import GameInputs (GameEvent(..))
+import Renderable (render)
+import Scene (scene)
+import Updateable (update)
 
 main :: Effect Unit
 main = do
@@ -33,7 +33,7 @@ main = do
                  let game =
                          foldp
                              updateGame
-                             (initialState currentInstant)
+                             (Box.initialState currentInstant)
                              (merge
                               (map JumpPressed jumpSignal)
                               (map Time timeSignal)
@@ -42,16 +42,16 @@ main = do
          Nothing -> do
                  pure unit
 
-updateGame :: GameEvent -> State -> State
+updateGame :: GameEvent -> Box.State -> Box.State
 updateGame event state = update state event
                   
-renderGame :: forall e. C.Context2D -> State -> Effect Unit
+renderGame :: C.Context2D -> Box.State -> Effect Unit
 renderGame context state = do
   clearCanvas context
   render state context
   pure unit
 
-clearCanvas :: forall e. C.Context2D -> Effect Unit
+clearCanvas :: C.Context2D -> Effect Unit
 clearCanvas ctx = do
   _ <- C.setFillStyle ctx "#000000"
   _ <- C.fillRect ctx { x: 0.0, y: 0.0, w: scene.width, h: scene.height }

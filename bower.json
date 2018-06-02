@@ -1,0 +1,17 @@
+{
+  "name": "purescript-canvas-game",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "dependencies": {
+    "purescript-prelude": "^4.0.0",
+    "purescript-console": "^4.1.0",
+    "purescript-canvas": "justinwoo/purescript-canvas#c235db7581bc31a7774a8261e042ccc5fbf4523b"
+  },
+  "devDependencies": {
+    "purescript-psci-support": "^4.0.0"
+  }
+}

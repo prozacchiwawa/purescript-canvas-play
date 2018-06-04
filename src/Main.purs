@@ -6,6 +6,9 @@ import Prelude
 import Effect (Effect)
 --import Effect.Console (log)
 import Effect.Now (now)
+import Data.DateTime.Instant
+import Data.List (List)
+import Data.List as List
 import Data.Maybe (Maybe(Just, Nothing))
 --import Data.DateTime.Instant
 --import Web.DOM
@@ -13,11 +16,30 @@ import Graphics.Canvas as C
 import Signal (foldp, runSignal, unwrap, merge)
 import Signal.DOM (animationFrame, keyPressed)
 
+import Box (Box)
 import Box as Box
+import Game
 import GameInputs (GameEvent(..))
-import Renderable (render)
+import GameState as GameState
+import GameState
+import Renderable
 import Scene (scene)
-import Updateable (update)
+import Updateable
+
+clearCanvas :: C.Context2D -> Effect Unit
+clearCanvas ctx = do
+  _ <- C.setFillStyle ctx "#000000"
+  _ <- C.fillRect ctx { x: 0.0, y: 0.0, w: scene.width, h: scene.height }
+  pure unit
+
+updateGame :: GameEvent -> Game -> Game
+updateGame event state = update state event
+                  
+renderGame :: C.Context2D -> Game -> Effect Unit
+renderGame context state = do
+  clearCanvas context
+  render state context
+  pure unit
 
 main :: Effect Unit
 main = do
@@ -33,7 +55,7 @@ main = do
                  let game =
                          foldp
                              updateGame
-                             (Box.initialState currentInstant)
+                             (init currentInstant)
                              (merge
                               (map JumpPressed jumpSignal)
                               (map Time timeSignal)
@@ -41,18 +63,3 @@ main = do
                  runSignal (renderGame context <$> game)
          Nothing -> do
                  pure unit
-
-updateGame :: GameEvent -> Box.State -> Box.State
-updateGame event state = update state event
-                  
-renderGame :: C.Context2D -> Box.State -> Effect Unit
-renderGame context state = do
-  clearCanvas context
-  render state context
-  pure unit
-
-clearCanvas :: C.Context2D -> Effect Unit
-clearCanvas ctx = do
-  _ <- C.setFillStyle ctx "#000000"
-  _ <- C.fillRect ctx { x: 0.0, y: 0.0, w: scene.width, h: scene.height }
-  pure unit

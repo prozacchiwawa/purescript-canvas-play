@@ -9,4 +9,3 @@ import GameInputs
     
 class Updateable a where
     update :: a -> GameEvent -> a
-                   

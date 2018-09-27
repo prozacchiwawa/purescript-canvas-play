@@ -11,7 +11,9 @@
     "purescript-console": "^4.1.0",
     "purescript-canvas": "justinwoo/purescript-canvas#c235db7581bc31a7774a8261e042ccc5fbf4523b",
     "purescript-ordered-collections": "^1.0.0",
-    "purescript-lists": "^5.0.0"
+    "purescript-lists": "^5.0.0",
+    "purescript-strings": "^4.0.0",
+    "purescript-foldable-traversable": "^4.0.1"
   },
   "devDependencies": {
     "purescript-psci-support": "^4.0.0"

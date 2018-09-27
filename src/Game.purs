@@ -34,9 +34,9 @@ init inst =
     { state: GameState.initialState inst
     , entities:
         List.Cons
-                (BoxEnt (Box.initialBox 0.0 10.0))
+                (BoxEnt (Box.initialBox "#687a99"))
                 (List.Cons
-                         (BoxEnt (Box.initialBox 30.0 12.0))
+                         (BoxEnt (Box.initialBox "#cbd1db"))
                          List.Nil
                 )
     }

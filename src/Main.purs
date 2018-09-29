@@ -9,7 +9,9 @@ import Effect.Now (now)
 import Data.DateTime.Instant
 import Data.List (List)
 import Data.List as List
+import Data.Tuple (Tuple(..))
 import Data.Maybe (Maybe(Just, Nothing))
+import Data.Traversable as Traversable
 --import Data.DateTime.Instant
 --import Web.DOM
 import Graphics.Canvas as C
@@ -33,12 +35,18 @@ clearCanvas ctx = do
   pure unit
 
 updateGame :: GameEvent -> Game -> Game
-updateGame event state = update state event
-                  
+updateGame event state =
+    let (Tuple newState effects) = update state event in
+    runEffects newState effects
+
 renderGame :: C.Context2D -> Game -> Effect Unit
 renderGame context state = do
   clearCanvas context
-  render state context
+  render state Background context
+  render state Moveables context
+  render state Characters context
+  render state Flair context
+  render state Hud context
   pure unit
 
 main :: Effect Unit

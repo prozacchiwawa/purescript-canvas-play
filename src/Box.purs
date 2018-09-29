@@ -1,6 +1,9 @@
 module Box where
 
 import Prelude
+import Data.Tuple (Tuple(..))
+import Data.List (List)
+import Data.List as List
 import Effect (Effect)
 import Graphics.Canvas as C
         
@@ -32,8 +35,12 @@ drawRect ctx (Box state) = do
   pure unit
 
 instance renderableBox :: Renderable Box where
-    render b@(Box box) context =
-        drawRect context b
+    render b@(Box box) pass context =
+        case pass of
+          Characters -> do
+            drawRect context b
+          _ -> do
+            pure unit
 
 instance updatedableBox :: UpdateInState Box where
     updateInState b@(Box box) s@(State state) =
@@ -46,19 +53,24 @@ instance updatedableBox :: UpdateInState Box where
                    state.jump
         in
         if reverse then
-            Box
-            (box
-             { x =
-                   if box.x < scene.x then
-                       scene.x
-                   else if box.x + scene.boxSize > scene.width then
-                       scene.width - scene.boxSize
-                   else
-                       box.x
-                        
-             , speed = -box.speed
-             }
+            Tuple
+            (Box
+             (box
+              { x =
+                    if box.x < scene.x then
+                        scene.x
+                    else if box.x + scene.boxSize > scene.width then
+                        scene.width - scene.boxSize
+                    else
+                        box.x
+                                
+              , speed = -box.speed
+              }
+             )
             )
+            List.Nil
         else
-            Box (box { x = box.x + (box.speed * 60.0 * elapsed) })
+            Tuple
+               (Box (box { x = box.x + (box.speed * 60.0 * elapsed) }))
+               List.Nil
       

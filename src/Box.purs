@@ -14,18 +14,24 @@ import Scene
 data Box = Box
     { x :: Number
     , speed :: Number
+    , npc :: Boolean
+    , color :: String
+    , hit :: Boolean
     }
 
-initialBox :: Number -> Number -> Box
-initialBox x speed =
+initialBox :: Number -> Number -> Boolean -> String -> Box
+initialBox x speed npc color =
     Box
     { x: x 
     , speed: speed
+    , npc: npc
+    , color: color
+    , hit: false
     }
 
 drawRect :: C.Context2D -> Box -> Effect Unit
 drawRect ctx (Box state) = do
-  _ <- C.setFillStyle ctx "#0088DD"
+  _ <- C.setFillStyle ctx state.color
   _ <- C.fillRect ctx
        { x: state.x
        , y: scene.height / 2.0
@@ -50,7 +56,7 @@ instance updatedableBox :: UpdateInState Box where
             reverse = 
                 box.x + scene.boxSize > scene.width ||
                    box.x < scene.x ||
-                   state.jump
+                      (box.npc && (not box.hit) && state.jump)
         in
         if reverse then
             Tuple
@@ -65,12 +71,19 @@ instance updatedableBox :: UpdateInState Box where
                         box.x
                                 
               , speed = -box.speed
+              , hit = state.jump
               }
              )
             )
             List.Nil
         else
             Tuple
-               (Box (box { x = box.x + (box.speed * 60.0 * elapsed) }))
-               List.Nil
+            (Box
+             (box
+              { x = box.x + (box.speed * 60.0 * elapsed)
+              , hit = state.jump
+              }
+             )
+            )
+            List.Nil
       

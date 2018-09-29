@@ -42,6 +42,7 @@ instance renderableState :: Renderable State where
     render s@(State state) pass context =
       case pass of
         Hud -> do
+          C.setFillStyle context "white"
           C.fillText context (show (gameTime s)) 10.0 10.0
         _ -> do
           pure unit
